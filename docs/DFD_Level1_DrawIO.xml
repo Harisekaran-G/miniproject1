@@ -1,0 +1,153 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="5.0" version="21.0.0" etag="drawio" type="device">
+  <diagram name="Level 1 DFD" id="dfd-level1">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="2000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- External Entity: User -->
+        <mxCell id="user" value="User&#xa;(Commuter)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="50" y="900" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 1.0: Mobile Application Interface -->
+        <mxCell id="p1" value="1.0&#xa;Mobile Application&#xa;Interface" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="250" y="880" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 2.0: Backend Server -->
+        <mxCell id="p2" value="2.0&#xa;Backend Server" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="550" y="880" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 3.0: Authentication Module -->
+        <mxCell id="p3" value="3.0&#xa;Authentication&#xa;Module" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="450" y="650" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 4.0: Maps & Routing Service -->
+        <mxCell id="p4" value="4.0&#xa;Maps &amp; Routing&#xa;Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="800" y="650" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 5.0: Bus Transport Service -->
+        <mxCell id="p5" value="5.0&#xa;Bus Transport&#xa;Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="800" y="1050" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 6.0: Taxi Service -->
+        <mxCell id="p6" value="6.0&#xa;Taxi Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="1050" width="150" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Process 7.0: Hybrid Route Optimization Module -->
+        <mxCell id="p7" value="7.0&#xa;Hybrid Route&#xa;Optimization Module" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="800" y="400" width="180" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Store D1: User Database -->
+        <mxCell id="d1" value="D1: User&#xa;Database" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="250" y="650" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Store D2: Trip History Database -->
+        <mxCell id="d2" value="D2: Trip History&#xa;Database" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="550" y="400" width="150" height="80" as="geometry" />
+        </mxCell>
+        
+        <!-- Data Flows -->
+        <!-- User to P1 -->
+        <mxCell id="flow1" value="Login Credentials&#xa;Travel Request" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="user" target="p1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P1 to P2 -->
+        <mxCell id="flow2" value="User Credentials&#xa;Travel Request" style="endArrow=block;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p1" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P3 -->
+        <mxCell id="flow3" value="User Credentials" style="endArrow=block;html=1;rounded=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P3 to D1 -->
+        <mxCell id="flow4" value="Query" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p3" target="d1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- D1 to P3 -->
+        <mxCell id="flow5" value="User Data" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="d1" target="p3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P3 to P2 -->
+        <mxCell id="flow6" value="Auth Result" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p3" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P4 -->
+        <mxCell id="flow7" value="Source, Destination" style="endArrow=block;html=1;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P4 to P2 -->
+        <mxCell id="flow8" value="Route Data, Distance,&#xa;Estimated Time" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p4" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P5 -->
+        <mxCell id="flow9" value="Route Query" style="endArrow=block;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P5 to P2 -->
+        <mxCell id="flow10" value="Bus Route Details,&#xa;Live Location,&#xa;Seat Availability,&#xa;Fare, ETA" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p5" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P6 -->
+        <mxCell id="flow11" value="Route Query" style="endArrow=block;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p6">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P6 to P2 -->
+        <mxCell id="flow12" value="Taxi Availability,&#xa;Fare Estimation, ETA" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p6" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P7 -->
+        <mxCell id="flow13" value="All Route Data&#xa;(Bus, Taxi, Maps)" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P7 to P2 -->
+        <mxCell id="flow14" value="Optimized Route,&#xa;Cost Comparison,&#xa;Time Comparison" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p7" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to D2 -->
+        <mxCell id="flow15" value="Trip Details" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="d2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- D2 to P2 -->
+        <mxCell id="flow16" value="Stored Trip Data" style="endArrow=block;html=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="d2" target="p2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P2 to P1 -->
+        <mxCell id="flow17" value="Recommended Option,&#xa;Fare Breakdown, ETA" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="p1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- P1 to User -->
+        <mxCell id="flow18" value="Travel Options,&#xa;Recommendations" style="endArrow=block;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="p1" target="user">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+
