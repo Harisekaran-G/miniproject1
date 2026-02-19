@@ -228,26 +228,31 @@ router.post('/book-taxi', async (req: Request, res: Response) => {
         destination: pickup.destination,
         distance: pickup.distance,
         fare: 50 + (pickup.distance * 15), // Simple calc: Base 50 + 15/km
-        scheduledTime: new Date(),
-        estimatedPickupTime: new Date()
+        scheduledTime: new Date(new Date(booking.busBooking?.departureTime || Date.now()).getTime() - 45 * 60000), // 45 mins before bus
+        estimatedPickupTime: new Date(new Date(booking.busBooking?.departureTime || Date.now()).getTime() - 45 * 60000)
       };
       additionalFare += booking.pickupTaxi.fare;
     }
 
     // Update Drop
     if (drop) {
+      // Calculate Scheduled Time: Bus Arrival + 15 mins buffer
+      const busArrivalTime = booking.busBooking?.arrivalTime ? new Date(booking.busBooking.arrivalTime) : new Date();
+      const scheduledTime = new Date(busArrivalTime.getTime() + 15 * 60000); // +15 mins
+
       booking.dropTaxi = {
         source: drop.source,
         destination: drop.location || drop.destination,
         distance: drop.distance,
         fare: 50 + (drop.distance * 15),
-        scheduledTime: new Date(),
-        estimatedPickupTime: new Date()
+        scheduledTime: scheduledTime,
+        estimatedPickupTime: scheduledTime
       };
       additionalFare += booking.dropTaxi.fare;
     }
 
     booking.totalFare += additionalFare;
+    booking.bookingType = 'hybrid'; // Upgrade to hybrid
     // booking.status = 'confirmed'; // Already confirmed
 
     await booking.save();

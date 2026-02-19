@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,13 +13,17 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/routeInputStyles';
-import { hybridAPI } from '../services/api';
+// Removed unused hybridAPI import to prevent potential issues
 
 export default function RouteInputScreen({ navigation }) {
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    console.log('RouteInputScreen mounted');
+  }, []);
 
   const validateInputs = () => {
     const newErrors = {};
@@ -41,10 +45,16 @@ export default function RouteInputScreen({ navigation }) {
   };
 
   const handleSearch = () => {
+    console.log('Search button pressed');
+    console.log('Current Source:', source);
+    console.log('Current Destination:', destination);
+
     if (!validateInputs()) {
+      console.log('Validation failed', errors);
       return;
     }
 
+    console.log('Navigating to Results...');
     navigation.navigate('Results', {
       source: source.trim(),
       destination: destination.trim(),
@@ -59,6 +69,7 @@ export default function RouteInputScreen({ navigation }) {
   ];
 
   const handleQuickSelect = (location, type) => {
+    console.log('Quick selecting:', location, type);
     if (type === 'source') {
       setSource(location);
       setErrors({ ...errors, source: null });
@@ -66,6 +77,13 @@ export default function RouteInputScreen({ navigation }) {
       setDestination(location);
       setErrors({ ...errors, destination: null });
     }
+  };
+
+  // Helper for demo verification
+  const autoFillDemo = () => {
+    setSource('Chennai');
+    setDestination('Coimbatore');
+    setErrors({});
   };
 
   return (
@@ -168,7 +186,7 @@ export default function RouteInputScreen({ navigation }) {
           <View style={styles.quickLocationsSection}>
             <Text style={styles.quickLocationsTitle}>Quick Select</Text>
             <View style={styles.quickLocationsRow}>
-              {quickLocations.map((location) => (
+              {quickLocations && quickLocations.map((location) => (
                 <View key={location.name} style={styles.quickLocationGroup}>
                   <TouchableOpacity
                     style={styles.quickLocationButton}
@@ -214,6 +232,16 @@ export default function RouteInputScreen({ navigation }) {
           >
             <Ionicons name="car" size={20} color="#FFFFFF" style={styles.searchIcon} />
             <Text style={styles.searchButtonText}>Book Local Taxi</Text>
+          </TouchableOpacity>
+
+          {/* Demo Fill Button (Debugging) */}
+          <TouchableOpacity
+            style={[styles.searchButton, { backgroundColor: '#FF9800', marginTop: 15, opacity: 0.8 }]}
+            onPress={autoFillDemo}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="flash" size={20} color="#FFFFFF" style={styles.searchIcon} />
+            <Text style={styles.searchButtonText}>Demo: Auto-Fill Route</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

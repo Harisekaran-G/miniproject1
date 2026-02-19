@@ -3,10 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  scrollContent: {
-    paddingBottom: 30,
+    backgroundColor: '#F4F4F4', // Light gray background for contrast
   },
   headerGradient: {
     paddingTop: 50,
@@ -25,10 +22,9 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1E3A5F',
+    color: '#FFF',
     textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 15,
+    marginTop: 10,
   },
   routeInfo: {
     flexDirection: 'row',
@@ -36,192 +32,152 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 10,
   },
-  routeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
   routeText: {
-    marginLeft: 6,
+    fontSize: 16,
+    color: '#FFF',
+    fontWeight: '600',
+  },
+  subHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  subHeaderText: {
     fontSize: 14,
     color: '#666',
-    fontWeight: '500',
+    fontWeight: '600',
   },
-  recommendationBanner: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF9C4',
-    margin: 20,
-    padding: 20,
-    borderRadius: 15,
-    alignItems: 'center',
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
+  scrollContent: {
+    padding: 15,
+    paddingBottom: 30,
+  },
+  // Bus Card Styles
+  busCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderLeftWidth: 5,
+    borderLeftColor: '#4A90E2', // Accent color
   },
-  recommendationTextContainer: {
-    marginLeft: 15,
-    flex: 1,
+  busCardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
-  recommendationTitle: {
-    fontSize: 18,
+  busName: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#1E3A5F',
-    marginBottom: 4,
+    color: '#333',
   },
-  recommendationSubtitle: {
-    fontSize: 14,
-    color: '#666',
+  busType: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
   },
-  optionsContainer: {
-    paddingHorizontal: 20,
-  },
-  optionCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  recommendedCard: {
-    borderColor: '#4A90E2',
-    borderWidth: 2,
-    backgroundColor: '#F0F8FF',
-  },
-  recommendedBadge: {
+  ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-    marginBottom: 12,
+    backgroundColor: '#DCF8C6', // Light green
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
-  recommendedText: {
-    marginLeft: 6,
+  ratingText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#1E3A5F',
+    color: '#2E7D32',
+    marginLeft: 3,
   },
-  optionHeader: {
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  timeBlock: {
+    alignItems: 'center',
+  },
+  timeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  dateText: {
+    fontSize: 10,
+    color: '#888',
+  },
+  durationContainer: {
+    alignItems: 'center',
+  },
+  durationLine: {
+    height: 1,
+    width: 40,
+    backgroundColor: '#DDD',
+    marginVertical: 4,
+  },
+  durationText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  busCardBottom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
-  },
-  optionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1E3A5F',
-  },
-  unavailableText: {
-    fontSize: 12,
-    color: '#E74C3C',
-    fontWeight: '600',
-  },
-  optionDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  detailText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '600',
-  },
-  breakdownContainer: {
-    marginTop: 15,
-    paddingTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#E0E0E0',
-  },
-  breakdownItem: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  breakdownLabel: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
-    width: 60,
-  },
-  breakdownValue: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  unavailableMessage: {
-    fontSize: 14,
-    color: '#999',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    padding: 10,
-  },
-  bookOptionButton: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 15,
-    shadowColor: '#4A90E2',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  bookOptionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  actionButtons: {
-    padding: 20,
+    borderTopColor: '#F0F0F0',
     paddingTop: 10,
   },
-  bookButton: {
-    flexDirection: 'row',
-    backgroundColor: '#4A90E2',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-    shadowColor: '#4A90E2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+  seatsInfo: {
+    fontSize: 12,
+    color: '#666',
   },
-  bookButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  backButtonSecondary: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  backButtonText: {
+  seatsCount: {
     color: '#4A90E2',
-    fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
+  },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  priceText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  onwardsText: {
+    fontSize: 10,
+    color: '#888',
+  },
+  selectButton: {
+    backgroundColor: '#FF4D4D', // Red like RedBus
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  selectButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
 });
-

@@ -29,30 +29,34 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     const newErrors = {};
-    
+
     if (!email) {
       newErrors.email = 'Email is required';
     } else if (!validateEmail(email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    
+
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
-    
+
     if (Object.keys(newErrors).length === 0) {
       setLoading(true);
       try {
         const response = await authAPI.login(email, password);
-        
+
+        console.log('Login Response:', response);
+
         if (response.success) {
+          console.log('Login successful, navigating to RouteInput...');
           // Navigate to route input screen on successful login
           navigation.replace('RouteInput');
         } else {
+          console.log('Login failed:', response.message);
           Alert.alert('Login Failed', response.message || 'Invalid credentials');
         }
       } catch (error) {
@@ -120,7 +124,7 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.heroSubtitle}>
             Book bus tickets and taxi rides with ease. Fast, reliable, and affordable transportation solutions.
           </Text>
-          
+
           <View style={styles.heroButtons}>
             <TouchableOpacity
               style={styles.getStartedButton}
@@ -129,10 +133,10 @@ export default function LoginScreen({ navigation }) {
             >
               <Text style={styles.getStartedText}>Get Started</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.loginTextButton}
-              onPress={() => {}}
+              onPress={() => { }}
               activeOpacity={0.8}
             >
               <Text style={styles.loginTextButtonText}>Login</Text>
@@ -239,7 +243,7 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.dividerText}>Demo Accounts</Text>
               <View style={styles.dividerLine} />
             </View>
-            
+
             <View style={styles.demoAccounts}>
               <View style={styles.demoAccountItem}>
                 <Text style={styles.demoLabel}>Email:</Text>

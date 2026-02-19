@@ -6,8 +6,12 @@
 // Use 127.0.0.1 for web browsers (localhost sometimes has issues)
 // Use 10.0.2.2 for Android Emulator, 127.0.0.1 for Web, or Machine IP for real device
 // NOTE: If using Android Emulator, set this to 'http://10.0.2.2:3000/api'
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
-// const API_BASE_URL = 'http://127.0.0.1:3000/api'; // Use this for Web/iOS Simulator
+import { Platform } from 'react-native';
+
+// Use 127.0.0.1/localhost for web/iOS, 10.0.2.2 for Android Emulator
+const API_BASE_URL = Platform.OS === 'android'
+  ? 'http://10.0.2.2:3000/api'
+  : 'http://localhost:3000/api';
 
 // Mock Data for Offline Fallback
 const MOCK_ROUTES = {
@@ -15,56 +19,73 @@ const MOCK_ROUTES = {
   data: {
     recommendedOption: "Hybrid",
     totalFare: 2200,
-    totalETA: 495, // 8h 15m in minutes
+    totalETA: 495,
     allOptions: {
-      busOnly: {
-        fare: 650,
-        eta: 570, // 9h 30m
-        available: true,
-        distance: "495 km",
-        duration: "9h 30m"
-      },
-      taxiOnly: {
-        fare: 6500,
-        eta: 525, // 8h 45m
-        available: true,
-        distance: "490 km",
-        duration: "8h 45m"
-      },
-      hybrid: {
-        fare: 2200,
-        eta: 495, // 8h 15m
-        available: true,
-        distance: "500 km",
-        duration: "8h 15m",
-        busFare: 650,
-        taxiFare: 1550
-      }
+      busOnly: { fare: 650, eta: 570, available: true, distance: "495 km", duration: "9h 30m" },
+      taxiOnly: { fare: 6500, eta: 525, available: true, distance: "490 km", duration: "8h 45m" },
+      hybrid: { fare: 2200, eta: 495, available: true, distance: "500 km", duration: "8h 15m", busFare: 650, taxiFare: 1550 }
     },
     breakdown: {
-      bus: {
-        busId: "bus-123",
-        routeNo: "45A",
-        fare: 650,
-        departureTime: "10:00 AM",
-        arrivalTime: "07:30 PM",
-        eta: 570
-      },
-      taxi: {
-        fare: 6500,
-        eta: 525
-      },
-      hybrid: {
-        busId: "bus-123",
-        routeNo: "45A",
-        busFare: 650,
-        taxiFare: 1550,
-        departureTime: "10:00 AM",
-        arrivalTime: "06:15 PM"
-      }
+      bus: { busId: "bus-123", routeNo: "45A", fare: 650, departureTime: "10:00 AM", arrivalTime: "07:30 PM", eta: 570 },
+      taxi: { fare: 6500, eta: 525 },
+      hybrid: { busId: "bus-123", routeNo: "45A", busFare: 650, taxiFare: 1550, departureTime: "10:00 AM", arrivalTime: "06:15 PM" }
     }
   },
   message: "Routes fetched successfully (Offline Mode)"
+};
+
+const MOCK_BUS_OPTIONS = {
+  success: true,
+  data: [
+    {
+      busId: "bus-101",
+      routeNo: "EXP-45A",
+      operatorName: "KPN Travels",
+      busType: "AC Sleeper (2+1)",
+      rating: 4.5,
+      seatsAvailable: 12,
+      departureTime: "10:00 PM",
+      arrivalTime: "06:00 AM",
+      duration: "8h 00m",
+      fare: 850
+    },
+    {
+      busId: "bus-102",
+      routeNo: "ULT-99B",
+      operatorName: "IntrCity SmartBus",
+      busType: "AC Seater (2+2)",
+      rating: 4.2,
+      seatsAvailable: 24,
+      departureTime: "11:30 PM",
+      arrivalTime: "07:15 AM",
+      duration: "7h 45m",
+      fare: 650
+    },
+    {
+      busId: "bus-103",
+      routeNo: "NON-22C",
+      operatorName: "SETC",
+      busType: "Non-AC Seater (3+2)",
+      rating: 3.8,
+      seatsAvailable: 8,
+      departureTime: "09:15 PM",
+      arrivalTime: "05:45 AM",
+      duration: "8h 30m",
+      fare: 450
+    }
+  ],
+  message: "Bus options fetched (Mock)"
+};
+
+const MOCK_BUS_DETAILS = {
+  success: true,
+  data: {
+    seats: Array.from({ length: 32 }, (_, i) => ({
+      seatNumber: `S${i + 1}`,
+      isBooked: Math.random() < 0.4
+    }))
+  },
+  message: "Bus details fetched (Mock)"
 };
 
 /**
@@ -117,6 +138,14 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     if (endpoint === '/getHybridRecommendation' || endpoint === '/routes') {
       console.log('[API] Returning mock data due to failure');
       return MOCK_ROUTES;
+    }
+    if (endpoint === '/getBusOptions') {
+      console.log('[API] Returning MOCK_BUS_OPTIONS due to failure');
+      return MOCK_BUS_OPTIONS;
+    }
+    if (endpoint === '/getBusDetails') {
+      console.log('[API] Returning MOCK_BUS_DETAILS due to failure');
+      return MOCK_BUS_DETAILS;
     }
 
     // Re-throw with more context if not handled by mock

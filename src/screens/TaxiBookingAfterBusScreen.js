@@ -139,7 +139,10 @@ export default function TaxiBookingAfterBusScreen({ route, navigation }) {
         {/* Pickup Section */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Pickup Taxi (To Bus Stand)</Text>
+            <View>
+              <Text style={styles.sectionTitle}>Pickup Taxi (To Bus Stand)</Text>
+              <Text style={{ fontSize: 12, color: '#666' }}>Scheduled 45 mins before bus departure</Text>
+            </View>
             <Switch value={addPickup} onValueChange={setAddPickup} trackColor={{ false: "#767577", true: "#4A90E2" }} />
           </View>
 
@@ -178,7 +181,12 @@ export default function TaxiBookingAfterBusScreen({ route, navigation }) {
         {/* Drop Section */}
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Drop Taxi (From Bus Stand)</Text>
+            <View>
+              <Text style={styles.sectionTitle}>Drop Taxi (From Bus Stand)</Text>
+              <Text style={{ fontSize: 12, color: '#666' }}>
+                Suggested: {busArrivalTime ? new Date(new Date(busArrivalTime).getTime() + 15 * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Upon Arrival'} (15m buffer)
+              </Text>
+            </View>
             <Switch value={addDrop} onValueChange={setAddDrop} trackColor={{ false: "#767577", true: "#4A90E2" }} />
           </View>
 
