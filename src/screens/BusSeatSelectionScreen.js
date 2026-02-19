@@ -14,10 +14,22 @@ import { styles } from '../styles/busSeatSelectionStyles';
 import { bookingAPI } from '../services/api';
 
 export default function BusSeatSelectionScreen({ route, navigation }) {
-  const { busId, routeNo, source, destination, fare, departureTime, arrivalTime } = route.params;
+  const {
+    busId,
+    routeNo,
+    source,
+    destination,
+    price,          // per-seat price — standardized field
+    totalSeats,
+    departureTime,
+    arrivalTime,
+  } = route.params;
+
+  console.log('Bus received — busId:', busId, 'price:', price);
+
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingSeats, setLoadingSeats] = useState(true); // Issue 2: separate loading state
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
@@ -26,33 +38,32 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
 
   const fetchBusDetails = async () => {
     try {
-      setLoading(true);
-      // Ensure we get fresh seat data
+      setLoadingSeats(true);
       const response = await bookingAPI.getBusDetails(busId);
-      if (response.success) {
-        setSeats(response.data.seats || generateMockSeats());
+
+      if (response?.success && response?.data?.seats?.length > 0) {
+        // Use real seats from backend
+        setSeats(response.data.seats);
       } else {
-        // Fallback to mock seats if API fails or returns empty for demo
-        setSeats(generateMockSeats());
+        // Issue 2: Fallback — generate seats dynamically from totalSeats
+        const count = response?.data?.totalSeats || totalSeats || 40;
+        setSeats(generateSeats(count));
       }
     } catch (error) {
       console.error('Error fetching bus details:', error);
-      setSeats(generateMockSeats()); // Fallback for stability
+      // Issue 2: Always render seats even on error
+      setSeats(generateSeats(totalSeats || 40));
     } finally {
-      setLoading(false);
+      setLoadingSeats(false);
     }
   };
 
-  const generateMockSeats = () => {
-    const mockSeats = [];
-    const rows = 8;
-    for (let i = 1; i <= rows * 4; i++) {
-      mockSeats.push({
-        seatNumber: `S${i}`,
-        isBooked: Math.random() < 0.3, // 30% booked
-      });
-    }
-    return mockSeats;
+  // Issue 2: Generate seats from count, not random booking state
+  const generateSeats = (count) => {
+    return Array.from({ length: count }, (_, i) => ({
+      seatNumber: (i + 1).toString().padStart(2, '0'),
+      isBooked: false,
+    }));
   };
 
   const toggleSeatSelection = (seatNumber) => {
@@ -63,100 +74,71 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
     }
   };
 
+  // Safe total: never NaN, never undefined
   const calculateTotal = () => {
-    return selectedSeats.length * fare;
+    const perSeatPrice = Number(price) || 0;
+    return selectedSeats.length * perSeatPrice;
   };
 
   const handleContinuePress = () => {
+    if (selectedSeats.length === 0) return;
     setModalVisible(true);
   };
 
   const handleSkipTaxi = () => {
     setModalVisible(false);
-    // Proceed to Payment with just Bus details
+    const totalAmount = calculateTotal();
     navigation.navigate('Payment', {
-      bookingDetails: {
+      totalFare: totalAmount,
+      bookingType: 'bus',
+      price: totalAmount,
+      taxiFare: 0,
+      pendingBookingDetails: {
         busId,
         routeNo,
+        busName: `Express Route ${routeNo}`,
         source,
         destination,
         seats: selectedSeats,
-        totalFare: calculateTotal(),
         departureTime,
         arrivalTime,
-        busFare: calculateTotal(),
-        taxiIncluded: false
-      }
+        price: Number(price) || 0,
+        totalAmount,
+      },
     });
   };
 
   const handleAddTaxi = () => {
     setModalVisible(false);
-    // Proceed to Taxi Booking (using TaxiBookingAfterBus screen or similar)
-    // We pass the bus booking details along
+    const totalAmount = calculateTotal();
     navigation.navigate('TaxiBookingAfterBus', {
-      busBookingId: 'TEMP_ID_' + Date.now(), // In real app, we might book bus first
+      busBookingId: 'TEMP_ID_' + Date.now(),
       source,
       destination,
       busArrivalTime: arrivalTime,
-      busFare: calculateTotal(),
-      totalFare: calculateTotal(),
+      price: totalAmount,
+      totalFare: totalAmount,
       seats: selectedSeats,
-      // Passing these to let the next screen know we haven't actually booked on backend yet
       isPendingBooking: true,
       pendingBookingDetails: {
         busId,
         routeNo,
+        busName: `Express Route ${routeNo}`,
+        source,
+        destination,
+        seats: selectedSeats,
         departureTime,
-        // other needed fields
-      }
+        arrivalTime,
+        price: Number(price) || 0,
+        totalAmount,
+      },
     });
   };
 
-  const renderSeatLayout = () => {
-    // Assuming simple 2+2 layout for visual
-    // Group seats into rows of 4
-    const rows = [];
-    for (let i = 0; i < seats.length; i += 4) {
-      rows.push(seats.slice(i, i + 4));
-    }
-
-    return (
-      <View style={styles.seatLayoutContainer}>
-        {/* Driver Cabin */}
-        <View style={styles.driverCabin}>
-          <Ionicons name="sunny-outline" size={24} color="#666" style={styles.steeringIcon} />
-          {/* Note: using sunny-outline as placeholder for steering wheel if not available, 
-              but usually 'car-sport' or custom SVG is better. Let's use 'ios-car' or similar if available,
-              or just a circle/icon. 'cog' looks a bit like a wheel too. 
-              Let's stick to a generic icon or Image if possible. 
-              Ionicons 'ellipse-outline' rotated could work? 
-              Actually 'radio-button-off' looks like a wheel. */}
-          <Ionicons name="radio-button-off" size={30} color="#999" style={{ transform: [{ rotate: '-45deg' }] }} />
-        </View>
-
-        {rows.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.seatRow}>
-            {/* Left Pair */}
-            <View style={styles.seatGroup}>
-              {row.slice(0, 2).map((seat) => renderSeat(seat))}
-            </View>
-
-            {/* Aisle */}
-            <View style={styles.aisle} />
-
-            {/* Right Pair */}
-            <View style={styles.seatGroup}>
-              {row.slice(2, 4).map((seat) => renderSeat(seat))}
-            </View>
-          </View>
-        ))}
-      </View>
-    );
-  };
-
   const renderSeat = (seat) => {
-    if (!seat) return <View style={[styles.seat, { backgroundColor: 'transparent', borderWidth: 0 }]} />;
+    if (!seat) {
+      return <View style={[styles.seat, { backgroundColor: 'transparent', borderWidth: 0 }]} />;
+    }
 
     const isSelected = selectedSeats.includes(seat.seatNumber);
     const isBooked = seat.isBooked;
@@ -180,26 +162,58 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
         disabled={isBooked}
         activeOpacity={0.8}
       >
+        {/* Issue 5: All text properly wrapped in <Text> */}
         <Text style={[styles.seatText, textStyle]}>{seat.seatNumber}</Text>
       </TouchableOpacity>
     );
   };
 
+  const renderSeatLayout = () => {
+    const rows = [];
+    for (let i = 0; i < seats.length; i += 4) {
+      rows.push(seats.slice(i, i + 4));
+    }
+
+    return (
+      <View style={styles.seatLayoutContainer}>
+        {/* Driver Cabin */}
+        <View style={styles.driverCabin}>
+          <Ionicons name="car-sport" size={30} color="#999" />
+        </View>
+
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.seatRow}>
+            {/* Left Pair */}
+            <View style={styles.seatGroup}>
+              {row.slice(0, 2).map((seat) => renderSeat(seat))}
+            </View>
+
+            {/* Aisle */}
+            <View style={styles.aisle} />
+
+            {/* Right Pair */}
+            <View style={styles.seatGroup}>
+              {row.slice(2, 4).map((seat) => renderSeat(seat))}
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  // Issue 1: Format fare safely — show 0 instead of NaN
+  const displayTotal = calculateTotal();
+
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient
-        colors={['#4A90E2', '#357ABD']}
-        style={styles.headerGradient}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+      <LinearGradient colors={['#4A90E2', '#357ABD']} style={styles.headerGradient}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Select Seats</Text>
         <View style={styles.routeInfo}>
+          {/* Issue 5: wrapped in Text, no bare strings */}
           <Text style={styles.routeText}>{source} </Text>
           <Ionicons name="arrow-forward" size={16} color="#E3F2FD" />
           <Text style={styles.routeText}> {destination}</Text>
@@ -213,6 +227,10 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
           <Text style={styles.timeText}>Dep: {departureTime}</Text>
           <Text style={styles.timeText}>Arr: {arrivalTime}</Text>
         </View>
+        {/* Show per-seat price clearly */}
+        <Text style={[styles.timeText, { marginTop: 4 }]}>
+          ₹{Number(price) || 0} per seat
+        </Text>
       </View>
 
       {/* Legend */}
@@ -233,7 +251,8 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
 
       {/* Seat Layout */}
       <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {loading ? (
+        {/* Issue 2: Use loadingSeats, not seats.length, to decide rendering */}
+        {loadingSeats ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#4A90E2" />
             <Text style={styles.loadingText}>Loading seats...</Text>
@@ -247,9 +266,12 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
       <View style={styles.footer}>
         <View style={styles.priceBreakdown}>
           <Text style={styles.selectedSeatsText}>
-            {selectedSeats.length > 0 ? `Seats: ${selectedSeats.join(', ')}` : 'No seats selected'}
+            {selectedSeats.length > 0
+              ? `Seats: ${selectedSeats.join(', ')}`
+              : 'No seats selected'}
           </Text>
-          <Text style={styles.totalPriceText}>₹{calculateTotal()}</Text>
+          {/* Issue 1: Use safe displayTotal — never NaN */}
+          <Text style={styles.totalPriceText}>₹{displayTotal}</Text>
         </View>
 
         <TouchableOpacity
@@ -270,32 +292,23 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <View style={{
-              backgroundColor: '#E3F2FD',
-              padding: 15,
-              borderRadius: 50,
-              marginBottom: 10
-            }}>
+            <View style={{ backgroundColor: '#E3F2FD', padding: 15, borderRadius: 50, marginBottom: 10 }}>
               <Ionicons name="car-sport" size={40} color="#4A90E2" />
             </View>
 
             <Text style={styles.modalTitle}>Local Taxi</Text>
             <Text style={styles.modalMessage}>
-              Do you need a local taxi drop after reaching <Text style={{ fontWeight: 'bold' }}>{destination}</Text>?
+              {'Do you need a local taxi drop after reaching '}
+              <Text style={{ fontWeight: 'bold' }}>{destination}</Text>
+              {'?'}
             </Text>
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.skipButton]}
-                onPress={handleSkipTaxi}
-              >
+              <TouchableOpacity style={[styles.modalButton, styles.skipButton]} onPress={handleSkipTaxi}>
                 <Text style={styles.skipButtonText}>No, Skip</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.taxiButton]}
-                onPress={handleAddTaxi}
-              >
+              <TouchableOpacity style={[styles.modalButton, styles.taxiButton]} onPress={handleAddTaxi}>
                 <Text style={styles.taxiButtonText}>Yes, Local Taxi</Text>
               </TouchableOpacity>
             </View>

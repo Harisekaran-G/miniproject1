@@ -45,7 +45,7 @@ router.post('/getHybridRecommendation', async (req: Request, res: Response) => {
         routeNo: bus.routeNo,
         source: bus.source,
         destination: bus.destination,
-        fare: bus.fare,
+        fare: bus.price,
         distance: bus.distance,
         eta: bus.eta,
         seatAvailable: availableSeats > 0,

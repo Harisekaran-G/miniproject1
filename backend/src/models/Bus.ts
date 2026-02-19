@@ -12,6 +12,7 @@ export interface IBus extends Document {
   source: string;
   destination: string;
   fare: number;
+  operatorEmail: string;
   distance: number; // in km
   eta: number; // in minutes
   departureTime: string; // e.g., "08:00"
@@ -58,6 +59,10 @@ const BusSchema: Schema = new Schema(
     },
     fare: {
       type: Number,
+      required: true,
+    },
+    operatorEmail: {
+      type: String,
       required: true,
     },
     distance: {

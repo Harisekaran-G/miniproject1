@@ -1,103 +1,71 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBooking extends Document {
-  userId: mongoose.Types.ObjectId;
-  bookingType: 'bus' | 'taxi' | 'hybrid';
-  busBooking?: {
-    busId: mongoose.Types.ObjectId;
-    routeNo: string;
-    source: string;
-    destination: string;
-    seats: string[];
-    fare: number;
-    departureTime: string;
-    arrivalTime: string;
-    bookingDate: Date;
+  userEmail: string;
+  passengerName: string;
+  passengerPhone: string;
+  route: {
+    from: string;
+    to: string;
   };
-  pickupTaxi?: {
-    source: string;
-    destination: string;
-    fare: number;
-    distance: number;
-    scheduledTime: Date;
-    estimatedPickupTime: Date;
-  };
-  dropTaxi?: {
-    source: string;
-    destination: string;
-    fare: number;
-    distance: number;
-    scheduledTime: Date;
-    estimatedPickupTime: Date;
-  };
+  busId: string;
+  busName: string;
+  seatNumbers: string[];
+  busFare: number;
+  taxiFare: number;
   totalFare: number;
-  paymentStatus: 'pending' | 'completed' | 'failed';
-  paymentMethod?: 'upi' | 'card' | 'netbanking' | 'wallet';
-  paymentId?: string;
-  status: 'confirmed' | 'cancelled' | 'completed';
-  createdAt: Date;
-  updatedAt: Date;
+  taxiSelected: boolean;
+  taxiPickup?: { address: string; time: string; selected: boolean };
+  taxiDrop?: { address: string; time: string; selected: boolean };
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  transactionId?: string;
+  bookingDate: Date;
+  status: 'confirmed' | 'cancelled';
 }
 
 const BookingSchema: Schema = new Schema(
   {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    userEmail: { type: String, required: true },
+    passengerName: { type: String, required: true },
+    passengerPhone: String,
+    route: {
+      from: String,
+      to: String,
     },
-    bookingType: {
-      type: String,
-      enum: ['bus', 'taxi', 'hybrid'],
-      required: true,
+    busId: String,
+    busName: String,
+    seatNumbers: [String],
+    busFare: Number,
+    taxiFare: Number,
+    totalFare: Number,
+    taxiSelected: Boolean,
+    // Detailed Taxi Fields
+    taxiPickup: {
+      address: String,
+      time: String,
+      selected: Boolean
     },
-    busBooking: {
-      busId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Bus',
-      },
-      routeNo: String,
-      source: String,
-      destination: String,
-      seats: [String],
-      fare: Number,
-      departureTime: String,
-      arrivalTime: String,
-      bookingDate: Date,
-    },
-    pickupTaxi: {
-      source: String,
-      destination: String,
-      fare: Number,
-      distance: Number,
-      scheduledTime: Date, // Based on bus departure time (minus travel time)
-      estimatedPickupTime: Date,
-    },
-    dropTaxi: {
-      source: String,
-      destination: String,
-      fare: Number,
-      distance: Number,
-      scheduledTime: Date, // Based on bus arrival time
-      estimatedPickupTime: Date,
-    },
-    totalFare: {
-      type: Number,
-      required: true,
+    taxiDrop: {
+      address: String,
+      time: String,
+      selected: Boolean
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'completed', 'failed'],
-      default: 'pending',
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending'
     },
-    paymentMethod: {
+    transactionId: {
       type: String,
-      enum: ['upi', 'card', 'netbanking', 'wallet'],
+      default: null
     },
-    paymentId: String,
+    bookingDate: {
+      type: Date,
+      default: Date.now,
+    },
     status: {
       type: String,
-      enum: ['confirmed', 'cancelled', 'completed'],
+      enum: ['confirmed', 'cancelled'],
       default: 'confirmed',
     },
   },

@@ -33,36 +33,81 @@ export default function PaymentScreen({ route, navigation }) {
 
     setLoading(true);
     try {
-      // In a real app, this would integrate with payment gateway or handle COD.
-      // For now, we'll simulate payment success for all methods (including Cash).
-      const paymentId = `PAY_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // --- MOCK PAYMENT & BOOKING CREATION ---
 
-      const response = await bookingAPI.processPayment({
-        bookingId,
-        paymentMethod: selectedPaymentMethod,
-        paymentId,
-      });
+      // 1. Generate Fake Transaction ID
+      const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substring(7).toUpperCase()}`;
+
+      // 2. Prepare Booking Data
+      // Extract details from route params
+      const { pendingBookingDetails, pickupDetails, dropDetails } = route.params;
+
+      // Fallback if details missing (e.g. direct dev access)
+      const busDetails = pendingBookingDetails || {
+        busId: 'BUS-UNKNOWN',
+        seats: [],
+        routeNo: 'UNKNOWN',
+        source: 'Unknown',
+        destination: 'Unknown'
+      };
+
+      const bookingData = {
+        userEmail: 'auth_test_user@example.com', // In real app, get from Context/Auth
+        passengerName: 'Demo User',
+        passengerPhone: '9876543210',
+        route: {
+          from: busDetails.source,
+          to: busDetails.destination
+        },
+        busId: busDetails.routeNo, // Using routeNo as ID for simplicity
+        busName: busDetails.busName || `Route ${busDetails.routeNo}`,
+        seatNumbers: busDetails.seats,
+        busFare: busFare || 0,
+        taxiFare: taxiFare || 0,
+        totalFare: totalFare,
+        taxiSelected: bookingType === 'hybrid',
+        // Detailed Taxi Info
+        taxiPickup: pickupDetails ? { ...pickupDetails, selected: true } : { selected: false },
+        taxiDrop: dropDetails ? { ...dropDetails, selected: true } : { selected: false },
+
+        // Payment Info
+        paymentStatus: 'paid',
+        transactionId: transactionId,
+        status: 'confirmed'
+      };
+
+      console.log('Creating Booking:', bookingData);
+
+      // 3. Call Backend API
+      const response = await bookingAPI.createBooking(bookingData);
 
       if (response.success) {
         Alert.alert(
           'Payment Successful!',
-          `Your booking has been confirmed. Booking ID: ${bookingId.substring(0, 8)}`,
+          `Transaction ID: ${transactionId}\n\nYour booking is confirmed!`,
           [
             {
-              text: 'OK',
+              text: 'View Booking',
               onPress: () => {
-                // Navigate to booking confirmation or home
+                // Navigate to MyBookings or Home
+                navigation.navigate('MyBookings');
+              },
+            },
+            {
+              text: 'Home',
+              onPress: () => {
                 navigation.reset({
                   index: 0,
                   routes: [{ name: 'RouteInput' }],
                 });
-              },
-            },
+              }
+            }
           ]
         );
       } else {
-        Alert.alert('Payment Failed', response.message || 'Failed to process payment');
+        Alert.alert('Booking Failed', response.message || 'Could not save booking');
       }
+
     } catch (error) {
       Alert.alert('Error', 'Failed to process payment');
       console.error('Payment error:', error);
@@ -91,7 +136,7 @@ export default function PaymentScreen({ route, navigation }) {
         {/* Booking Summary */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Booking Summary</Text>
-          
+
           {bookingType === 'hybrid' && busFare && taxiFare && (
             <>
               <View style={styles.summaryRow}>
@@ -115,7 +160,7 @@ export default function PaymentScreen({ route, navigation }) {
         {/* Payment Methods */}
         <View style={styles.paymentMethodsCard}>
           <Text style={styles.paymentMethodsTitle}>Select Payment Method</Text>
-          
+
           {paymentMethods.map((method) => (
             <TouchableOpacity
               key={method.id}

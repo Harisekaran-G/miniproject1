@@ -29,36 +29,41 @@ router.post('/getBusOptions', async (req: Request, res: Response) => {
       });
     }
 
-    // Find buses matching source and destination
+    // .lean() returns raw MongoDB docs — Mongoose would strip non-schema fields
+    // (price, rating, seatsAvailable) without it, causing ₹0 on the frontend
     const buses = await Bus.find({
-      source: new RegExp(`^${source}$`, 'i'),
-      destination: new RegExp(`^${destination}$`, 'i'),
-    });
+      source: { $regex: source, $options: 'i' },
+      destination: { $regex: destination, $options: 'i' },
+    }).lean();
 
     // Convert to BusOption format
     // Optimizing this for loop with database calls inside might be slow for many buses.
     // Ideally we aggregate, but for now map with Promise.all
-    const busOptions = await Promise.all(buses.map(async (bus) => {
-      // Get booked seats count from Seat collection
+    const busOptions = await Promise.all(buses.map(async (bus: any) => {
       const bookedSeatsCount = await Seat.countDocuments({
         busId: bus._id,
-        isBooked: true
+        isBooked: true,
       });
 
-      const availableSeats = bus.totalSeats - bookedSeatsCount;
+      // DB documents use `price` (manual inserts) or `fare` (seeded via model)
+      const price = bus.price ?? bus.fare ?? 0;
+      const totalSeatCount = bus.totalSeats ?? bus.seatsAvailable ?? 40;
+      const availableSeats = bus.totalSeats
+        ? Math.max(bus.totalSeats - bookedSeatsCount, 0)
+        : (bus.seatsAvailable ?? 40);
 
       return {
         _id: bus._id.toString(),
         routeNo: bus.routeNo,
         source: bus.source,
         destination: bus.destination,
-        fare: bus.fare,
-        distance: bus.distance,
-        eta: bus.eta,
+        price,                             // single canonical field
+        rating: bus.rating ?? null,
+        duration: bus.duration ?? '',
+        distance: bus.distance ?? 0,
         seatAvailable: availableSeats > 0,
-        availableSeats: availableSeats,
-        totalSeats: bus.totalSeats,
-        coveragePercent: bus.coveragePercent,
+        seatsAvailable: availableSeats,
+        totalSeats: totalSeatCount,
         departureTime: bus.departureTime,
         arrivalTime: bus.arrivalTime,
       };
@@ -141,19 +146,21 @@ router.post('/getBusDetails', async (req: Request, res: Response) => {
     // We clone the bus object to avoid modifying the Mongoose document directly if it's restrictive
     const busObj: any = bus.toObject();
 
-    if (busObj.seats) {
+    if (busObj.seats && busObj.seats.length > 0) {
+      // Merge with live booked seats from Seat collection
       busObj.seats = busObj.seats.map((seat: any) => ({
         ...seat,
-        isBooked: bookedSeatMap.has(seat.seatNumber)
+        isBooked: bookedSeatMap.has(seat.seatNumber),
       }));
     } else {
-      // Fallback if seats array missing
+      // Issue 2: Generate seats dynamically if none embedded (e.g., seeded via insertMany)
       busObj.seats = [];
-      for (let i = 1; i <= bus.totalSeats; i++) {
+      const count = bus.totalSeats || 40;
+      for (let i = 1; i <= count; i++) {
         const seatNum = i.toString().padStart(2, '0');
         busObj.seats.push({
           seatNumber: seatNum,
-          isBooked: bookedSeatMap.has(seatNum)
+          isBooked: bookedSeatMap.has(seatNum),
         });
       }
     }

@@ -66,35 +66,36 @@ export default function ResultsScreen({ route, navigation }) {
   };
 
   const handleSelectBus = (bus) => {
+    console.log('Bus object:', bus);
     navigation.navigate('BusSeatSelection', {
-      busId: bus.busId || bus._id,
+      busId: bus._id || bus.busId,
       routeNo: bus.routeNo,
       source,
       destination,
-      fare: bus.fare,
-      departureTime: bus.departureTime, // Assuming string "HH:MM AM/PM" or timestamp
+      price: bus.price ?? 0,
+      totalSeats: bus.totalSeats ?? bus.seatsAvailable ?? 40,
+      departureTime: bus.departureTime,
       arrivalTime: bus.arrivalTime,
-      // Pass other details if needed
     });
   };
 
   const renderBusCard = ({ item }) => {
-    // Generate some random visual data if missing (for demo feel)
-    const rating = item.rating || (4 + Math.random()).toFixed(1);
-    const busType = item.busType || "AC Sleeper (2+1)";
-    const seatsAvailable = item.seatsAvailable || Math.floor(Math.random() * 20) + 5;
+    // Use real data from API, with safe fallbacks
+    const priceDisplay = item.price ?? 0;
+    const rating = item.rating ? Number(item.rating).toFixed(1) : '4.0';
+    const busType = item.busType || 'AC Seater (2+2)';
+    const seatsLeft = item.seatsAvailable ?? 0;
 
-    // Ensure we have displayable times
-    const depTime = item.departureTime || formatTime(item.departureTimeMins || 600);
-    const arrTime = item.arrivalTime || formatTime((item.departureTimeMins || 600) + (item.durationMins || 360));
-    const dur = item.duration || formatDuration(item.durationMins || 360);
+    const depTime = item.departureTime || '—';
+    const arrTime = item.arrivalTime || '—';
+    const dur = item.duration || (item.eta ? formatDuration(item.eta) : '—');
 
     return (
       <View style={styles.busCard}>
         {/* Top Row: Name, Type, Rating */}
         <View style={styles.busCardTop}>
           <View>
-            <Text style={styles.busName}>{item.operatorName || "Express Travels"}</Text>
+            <Text style={styles.busName}>{item.operatorName || 'Express Travels'}</Text>
             <Text style={styles.busType}>{busType} | {item.routeNo}</Text>
           </View>
           <View style={styles.ratingContainer}>
@@ -123,12 +124,12 @@ export default function ResultsScreen({ route, navigation }) {
         {/* Bottom Row: Price, Seats, Select Button */}
         <View style={styles.busCardBottom}>
           <Text style={styles.seatsInfo}>
-            <Text style={styles.seatsCount}>{seatsAvailable}</Text> seats left
+            <Text style={styles.seatsCount}>{seatsLeft}</Text> seats left
           </Text>
 
           <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>₹{item.fare}</Text>
-            <Text style={styles.onwardsText}>onwards</Text>
+            <Text style={styles.priceText}>₹{priceDisplay}</Text>
+            <Text style={styles.onwardsText}>per seat</Text>
           </View>
 
           <TouchableOpacity

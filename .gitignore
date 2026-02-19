@@ -24,3 +24,8 @@ dist/
 *.swp
 *.swo
 
+# MongoDB data files (locked at runtime)
+backend/db_data/
+
+# Backend compiled output
+backend/dist/

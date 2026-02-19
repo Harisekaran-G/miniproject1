@@ -52,9 +52,14 @@ export default function LoginScreen({ navigation }) {
         console.log('Login Response:', response);
 
         if (response.success) {
-          console.log('Login successful, navigating to RouteInput...');
-          // Navigate to route input screen on successful login
-          navigation.replace('RouteInput');
+          console.log('Login successful', response.user);
+
+          if (response.user.role === 'operator') {
+            navigation.replace('OperatorDashboard', { operatorEmail: response.user.email });
+          } else {
+            // Default user flow
+            navigation.replace('RouteInput');
+          }
         } else {
           console.log('Login failed:', response.message);
           Alert.alert('Login Failed', response.message || 'Invalid credentials');
@@ -68,25 +73,10 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
-  const handleUseDemoAccount = () => {
-    setEmail('demo@example.com');
-    setPassword('demo123');
-    setErrors({});
-  };
-
-  const handleForgotPassword = () => {
-    console.log('Forgot password pressed');
-    // Navigate to forgot password screen
-  };
-
-  const handleSkipLogin = () => {
-    // Demo-only: allow user to bypass login and see the rest of the flow
-    navigation.replace('RouteInput');
-  };
+  /* Removed Demo Handlers */
 
   const handleSignUp = () => {
-    console.log('Sign up pressed');
-    // Navigate to sign up screen
+    navigation.navigate('SignUp');
   };
 
   const handleGetStarted = () => {
@@ -205,13 +195,7 @@ export default function LoginScreen({ navigation }) {
             )}
           </View>
 
-          {/* Forgot Password Link */}
-          <TouchableOpacity
-            onPress={handleForgotPassword}
-            style={styles.forgotPasswordContainer}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+
 
           {/* Sign In Button */}
           <TouchableOpacity
@@ -227,53 +211,16 @@ export default function LoginScreen({ navigation }) {
             )}
           </TouchableOpacity>
 
-          {/* Skip Login (Demo) */}
-          <TouchableOpacity
-            style={[styles.loginTextButton, { marginTop: 12 }]}
-            onPress={handleSkipLogin}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.loginTextButtonText}>Skip Login (Demo)</Text>
-          </TouchableOpacity>
-
-          {/* Demo Accounts Section */}
-          <View style={styles.demoSection}>
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Demo Accounts</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.demoAccounts}>
-              <View style={styles.demoAccountItem}>
-                <Text style={styles.demoLabel}>Email:</Text>
-                <Text style={styles.demoValue}>demo@example.com</Text>
-              </View>
-              <View style={styles.demoAccountItem}>
-                <Text style={styles.demoLabel}>Password:</Text>
-                <Text style={styles.demoValue}>demo123</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.signInButton, { marginTop: 12 }]}
-              onPress={handleUseDemoAccount}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.signInButtonText}>Use Demo Account</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Footer Sign Up Link */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={handleSignUp}>
-            <Text style={styles.footerLink}>Sign Up</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Footer Sign Up Link */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Don't have an account? </Text>
+        <TouchableOpacity onPress={handleSignUp}>
+          <Text style={styles.footerLink}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
     </KeyboardAvoidingView>
   );
 }
-

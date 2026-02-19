@@ -8,9 +8,9 @@
 // NOTE: If using Android Emulator, set this to 'http://10.0.2.2:3000/api'
 import { Platform } from 'react-native';
 
-// Use 127.0.0.1/localhost for web/iOS, 10.0.2.2 for Android Emulator
+// Use 127.0.0.1/localhost for web/iOS, 10.0.6.197 for Android Emulator/Device
 const API_BASE_URL = Platform.OS === 'android'
-  ? 'http://10.0.2.2:3000/api'
+  ? 'http://10.0.6.197:3000/api'
   : 'http://localhost:3000/api';
 
 // Mock Data for Offline Fallback
@@ -166,6 +166,12 @@ export const authAPI = {
   login: async (email, password) => {
     return apiRequest('/login', 'POST', { email, password });
   },
+  /**
+   * Register new user
+   */
+  register: async (userData) => {
+    return apiRequest('/register', 'POST', userData);
+  },
 };
 
 /**
@@ -272,10 +278,28 @@ export const bookingAPI = {
     return apiRequest('/processPayment', 'POST', paymentData);
   },
   /**
+   * Create Booking (After Payment)
+   */
+  createBooking: async (bookingData) => {
+    return apiRequest('/create', 'POST', bookingData);
+  },
+  /**
+   * Get Operator Bookings
+   */
+  getOperatorBookings: async (operatorEmail) => {
+    return apiRequest(`/operator/bookings?operatorEmail=${operatorEmail}`, 'GET');
+  },
+  /**
    * Get user bookings
    */
   getBookings: async (userId) => {
     return apiRequest(`/getBookings/${userId}`, 'GET');
+  },
+  /**
+   * Get Taxi Bookings (Mock Role)
+   */
+  getTaxiBookings: async () => {
+    return apiRequest('/taxi/bookings', 'GET');
   },
 };
 
