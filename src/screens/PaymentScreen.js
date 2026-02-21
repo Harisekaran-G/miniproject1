@@ -6,16 +6,19 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
+import QRCode from "react-native-qrcode-svg";
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/paymentStyles';
 import { bookingAPI } from '../services/api';
 
 export default function PaymentScreen({ route, navigation }) {
-  const { bookingId, totalFare, bookingType, busFare, taxiFare } = route.params;
+  const { bookingId, totalFare, bookingType, busFare, taxiFare, convenienceFee } = route.params;
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const paymentMethods = [
     { id: 'upi', name: 'UPI', icon: 'phone-portrait', color: '#4A90E2' },
@@ -64,6 +67,7 @@ export default function PaymentScreen({ route, navigation }) {
         seatNumbers: busDetails.seats,
         busFare: busFare || 0,
         taxiFare: taxiFare || 0,
+        convenienceFee: convenienceFee || 0,
         totalFare: totalFare,
         taxiSelected: bookingType === 'hybrid',
         // Detailed Taxi Info
@@ -89,8 +93,9 @@ export default function PaymentScreen({ route, navigation }) {
             {
               text: 'View Booking',
               onPress: () => {
-                // Navigate to MyBookings or Home
-                navigation.navigate('MyBookings');
+                navigation.navigate('BookingConfirmation', {
+                  bookingData: { ...bookingData, bookingId: `BK_${Date.now()}` }
+                });
               },
             },
             {
@@ -116,6 +121,19 @@ export default function PaymentScreen({ route, navigation }) {
     }
   };
 
+  const handlePayNowPress = () => {
+    if (!selectedPaymentMethod) {
+      Alert.alert('Error', 'Please select a payment method');
+      return;
+    }
+
+    if (selectedPaymentMethod === 'upi') {
+      setShowQR(true);
+    } else {
+      handlePayment();
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -137,19 +155,24 @@ export default function PaymentScreen({ route, navigation }) {
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Booking Summary</Text>
 
-          {bookingType === 'hybrid' && busFare && taxiFare && (
-            <>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Bus Fare:</Text>
-                <Text style={styles.summaryValue}>₹{busFare}</Text>
-              </View>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Taxi Fare:</Text>
-                <Text style={styles.summaryValue}>₹{taxiFare}</Text>
-              </View>
-              <View style={styles.summaryDivider} />
-            </>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Base Fare:</Text>
+            <Text style={styles.summaryValue}>₹{busFare}</Text>
+          </View>
+
+          {taxiFare > 0 && (
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Taxi Fare ({route.params.pendingBookingDetails?.taxiDetails?.name || 'Local'}):</Text>
+              <Text style={styles.summaryValue}>₹{taxiFare}</Text>
+            </View>
           )}
+
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Convenience Fee:</Text>
+            <Text style={styles.summaryValue}>₹{convenienceFee || 20}</Text>
+          </View>
+
+          <View style={styles.summaryDivider} />
 
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Total Amount:</Text>
@@ -201,7 +224,7 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
         <TouchableOpacity
           style={[styles.payButton, !selectedPaymentMethod && styles.payButtonDisabled]}
-          onPress={handlePayment}
+          onPress={handlePayNowPress}
           disabled={!selectedPaymentMethod || loading}
           activeOpacity={0.8}
         >
@@ -215,6 +238,92 @@ export default function PaymentScreen({ route, navigation }) {
           )}
         </TouchableOpacity>
       </View>
+
+      {/* QR Modal */}
+      <Modal
+        visible={showQR}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          <View style={{
+            backgroundColor: "#fff",
+            padding: 25,
+            borderRadius: 15,
+            alignItems: "center",
+            width: "85%"
+          }}>
+
+            <Text style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              marginBottom: 10
+            }}>
+              Scan & Pay
+            </Text>
+
+            <Text style={{
+              fontSize: 22,
+              color: "green",
+              fontWeight: "bold",
+              marginBottom: 15
+            }}>
+              ₹ {totalFare}
+            </Text>
+
+            <QRCode
+              value={`upi://pay?pa=busbooking@upi&pn=BusBooking&am=${totalFare}`}
+              size={200}
+            />
+
+            <Text style={{
+              marginTop: 15,
+              fontSize: 14,
+              color: '#666'
+            }}>
+              UPI ID: busbooking@upi
+            </Text>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 20,
+                backgroundColor: "#1E3A8A",
+                padding: 12,
+                borderRadius: 8,
+                width: "100%",
+                alignItems: "center"
+              }}
+              onPress={() => {
+                setShowQR(false);
+                handlePayment();
+              }}
+            >
+              <Text style={{
+                color: "#fff",
+                fontWeight: "bold"
+              }}>
+                I Have Paid
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                marginTop: 10,
+                padding: 5
+              }}
+              onPress={() => setShowQR(false)}
+            >
+              <Text style={{ color: '#E74C3C' }}>Cancel</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

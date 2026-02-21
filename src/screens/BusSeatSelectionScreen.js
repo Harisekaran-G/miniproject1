@@ -82,56 +82,18 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
 
   const handleContinuePress = () => {
     if (selectedSeats.length === 0) return;
-    setModalVisible(true);
-  };
 
-  const handleSkipTaxi = () => {
-    setModalVisible(false);
     const totalAmount = calculateTotal();
-    navigation.navigate('Payment', {
-      totalFare: totalAmount,
-      bookingType: 'bus',
-      price: totalAmount,
-      taxiFare: 0,
-      pendingBookingDetails: {
-        busId,
-        routeNo,
-        busName: `Express Route ${routeNo}`,
-        source,
-        destination,
-        seats: selectedSeats,
-        departureTime,
-        arrivalTime,
-        price: Number(price) || 0,
-        totalAmount,
-      },
-    });
-  };
-
-  const handleAddTaxi = () => {
-    setModalVisible(false);
-    const totalAmount = calculateTotal();
-    navigation.navigate('TaxiBookingAfterBus', {
-      busBookingId: 'TEMP_ID_' + Date.now(),
+    navigation.navigate('BoardingDropping', {
+      busId,
+      routeNo,
       source,
       destination,
-      busArrivalTime: arrivalTime,
-      price: totalAmount,
-      totalFare: totalAmount,
-      seats: selectedSeats,
-      isPendingBooking: true,
-      pendingBookingDetails: {
-        busId,
-        routeNo,
-        busName: `Express Route ${routeNo}`,
-        source,
-        destination,
-        seats: selectedSeats,
-        departureTime,
-        arrivalTime,
-        price: Number(price) || 0,
-        totalAmount,
-      },
+      departureTime,
+      arrivalTime,
+      price: Number(price) || 0,
+      selectedSeats,
+      totalBusFare: totalAmount,
     });
   };
 
@@ -270,7 +232,6 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
               ? `Seats: ${selectedSeats.join(', ')}`
               : 'No seats selected'}
           </Text>
-          {/* Issue 1: Use safe displayTotal — never NaN */}
           <Text style={styles.totalPriceText}>₹{displayTotal}</Text>
         </View>
 
@@ -282,39 +243,6 @@ export default function BusSeatSelectionScreen({ route, navigation }) {
           <Text style={styles.continueButtonText}>Continue to Booking</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Taxi Confirmation Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={{ backgroundColor: '#E3F2FD', padding: 15, borderRadius: 50, marginBottom: 10 }}>
-              <Ionicons name="car-sport" size={40} color="#4A90E2" />
-            </View>
-
-            <Text style={styles.modalTitle}>Local Taxi</Text>
-            <Text style={styles.modalMessage}>
-              {'Do you need a local taxi drop after reaching '}
-              <Text style={{ fontWeight: 'bold' }}>{destination}</Text>
-              {'?'}
-            </Text>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={[styles.modalButton, styles.skipButton]} onPress={handleSkipTaxi}>
-                <Text style={styles.skipButtonText}>No, Skip</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={[styles.modalButton, styles.taxiButton]} onPress={handleAddTaxi}>
-                <Text style={styles.taxiButtonText}>Yes, Local Taxi</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

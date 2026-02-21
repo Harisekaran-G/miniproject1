@@ -18,6 +18,7 @@ import { styles } from '../styles/routeInputStyles';
 export default function RouteInputScreen({ navigation }) {
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
+  const [journeyDate, setJourneyDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -58,7 +59,16 @@ export default function RouteInputScreen({ navigation }) {
     navigation.navigate('Results', {
       source: source.trim(),
       destination: destination.trim(),
+      journeyDate: journeyDate,
     });
+  };
+
+  const handleDateSelect = (type) => {
+    const date = new Date();
+    if (type === 'tomorrow') {
+      date.setDate(date.getDate() + 1);
+    }
+    setJourneyDate(date.toISOString().split('T')[0]);
   };
 
   const quickLocations = [
@@ -180,6 +190,45 @@ export default function RouteInputScreen({ navigation }) {
             {errors.destination && (
               <Text style={styles.errorText}>{errors.destination}</Text>
             )}
+          </View>
+
+          {/* Date of Journey Section */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Date of Journey</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="calendar-outline" size={20} color="#4A90E2" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                value={journeyDate}
+                onChangeText={setJourneyDate}
+                placeholder="YYYY-MM-DD"
+              />
+            </View>
+            <View style={{ flexDirection: 'row', marginTop: 10 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: journeyDate === new Date().toISOString().split('T')[0] ? '#4A90E2' : '#f0f0f0',
+                  paddingVertical: 6,
+                  paddingHorizontal: 12,
+                  borderRadius: 20,
+                  marginRight: 10
+                }}
+                onPress={() => handleDateSelect('today')}
+              >
+                <Text style={{ color: journeyDate === new Date().toISOString().split('T')[0] ? '#fff' : '#666', fontSize: 13 }}>Today</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: journeyDate === new Date(Date.now() + 86400000).toISOString().split('T')[0] ? '#4A90E2' : '#f0f0f0',
+                  paddingVertical: 6,
+                  paddingHorizontal: 12,
+                  borderRadius: 20
+                }}
+                onPress={() => handleDateSelect('tomorrow')}
+              >
+                <Text style={{ color: journeyDate === new Date(Date.now() + 86400000).toISOString().split('T')[0] ? '#fff' : '#666', fontSize: 13 }}>Tomorrow</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Quick Locations */}

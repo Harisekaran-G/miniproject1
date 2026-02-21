@@ -28,6 +28,7 @@ async function seedDatabase() {
       source: route.source,
       destination: route.destination,
       fare: route.fare,
+      operatorEmail: 'operator@example.com',
       distance: route.distance,
       eta: route.eta,
       departureTime: generateDepartureTime(),

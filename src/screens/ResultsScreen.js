@@ -13,9 +13,11 @@ import { styles } from '../styles/resultsStyles';
 import { busAPI } from '../services/api';
 
 export default function ResultsScreen({ route, navigation }) {
-  const { source, destination } = route.params;
+  const { source, destination, journeyDate } = route.params;
   const [loading, setLoading] = useState(true);
   const [buses, setBuses] = useState([]);
+  const [filteredBuses, setFilteredBuses] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('All');
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export default function ResultsScreen({ route, navigation }) {
 
       if (response.success) {
         setBuses(response.data || []);
+        setFilteredBuses(response.data || []);
       } else {
         // Mock data fallback if API fails or returns empty (for demo purposes)
         if (response.data && Array.isArray(response.data)) {
@@ -46,6 +49,18 @@ export default function ResultsScreen({ route, navigation }) {
       setError('Failed to load buses. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const applyFilter = (filter) => {
+    setActiveFilter(filter);
+    if (filter === 'All') {
+      setFilteredBuses(buses);
+    } else {
+      const filtered = buses.filter(bus =>
+        (bus.busType || '').toLowerCase().includes(filter.toLowerCase())
+      );
+      setFilteredBuses(filtered);
     }
   };
 
@@ -159,9 +174,30 @@ export default function ResultsScreen({ route, navigation }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{source} to {destination}</Text>
         <Text style={{ textAlign: 'center', color: '#E3F2FD', fontSize: 12, marginTop: 4 }}>
-          Today
+          {journeyDate || 'Today'}
         </Text>
       </LinearGradient>
+
+      {/* Filters */}
+      <View style={{ flexDirection: 'row', padding: 10, backgroundColor: '#fff' }}>
+        {['All', 'Sleeper', 'Semi Sleeper'].map(filter => (
+          <TouchableOpacity
+            key={filter}
+            onPress={() => applyFilter(filter)}
+            style={{
+              paddingHorizontal: 15,
+              paddingVertical: 8,
+              borderRadius: 20,
+              backgroundColor: activeFilter === filter ? '#4A90E2' : '#f0f0f0',
+              marginRight: 10,
+              borderWidth: 1,
+              borderColor: activeFilter === filter ? '#4A90E2' : '#ddd'
+            }}
+          >
+            <Text style={{ color: activeFilter === filter ? '#fff' : '#666', fontWeight: '500' }}>{filter}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       {/* Sub-Header / Filter placeholder */}
       <View style={styles.subHeader}>
@@ -190,7 +226,7 @@ export default function ResultsScreen({ route, navigation }) {
         </View>
       ) : (
         <FlatList
-          data={buses}
+          data={filteredBuses}
           renderItem={renderBusCard}
           keyExtractor={(item) => item.busId || item._id || Math.random().toString()}
           contentContainerStyle={styles.scrollContent}
