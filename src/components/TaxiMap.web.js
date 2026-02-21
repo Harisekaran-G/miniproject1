@@ -1,8 +1,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Helper component to center map
+function ChangeView({ center, zoom }) {
+    const map = useMap();
+    map.setView(center, zoom);
+    return null;
+}
 
 // Fix for default marker icons in Leaflet + React
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -17,19 +24,21 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-export default function TaxiMap({ dropPoint, finalDest }) {
+export default function TaxiMap({ dropPoint, finalDest, center: mapCenter }) {
     // Fallback coords if not provided
     const center = dropPoint || [13.0827, 80.2707];
     const dest = finalDest || [12.9801, 80.2224];
+    const initialCenter = mapCenter || center;
 
     return (
         <View style={styles.container}>
             <MapContainer
-                center={center}
+                center={initialCenter}
                 zoom={13}
                 style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={false}
             >
+                <ChangeView center={initialCenter} zoom={13} />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -20,7 +20,10 @@ export default function BoardingDroppingScreen({ route, navigation }) {
         arrivalTime,
         price,
         selectedSeats,
-        totalBusFare
+        totalBusFare,
+        journeyDate,
+        busType,
+        operatorName
     } = route.params;
 
     const [activeTab, setActiveTab] = useState('boarding');
@@ -48,17 +51,25 @@ export default function BoardingDroppingScreen({ route, navigation }) {
 
         // Navigate directly to TaxiSelection Screen
         navigation.navigate('TaxiSelection', {
-            busId,
-            routeNo,
-            source,
-            destination,
-            departureTime,
-            arrivalTime,
-            price,
-            selectedSeats,
-            totalBusFare,
-            boardingPoint: selectedBoarding,
-            droppingPoint: selectedDropping,
+            busDropPoint: selectedDropping,
+            busArrivalTime: arrivalTime,
+            destinationCity: destination,
+            busDetails: {
+                busId,
+                routeNo,
+                source,
+                destination,
+                journeyDate,
+                busType,
+                operatorName,
+                departureTime,
+                arrivalTime,
+                price,
+                selectedSeats,
+                totalBusFare,
+                boardingPoint: selectedBoarding,
+                droppingPoint: selectedDropping
+            }
         });
     };
 

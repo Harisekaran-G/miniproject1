@@ -81,12 +81,14 @@ export default function ResultsScreen({ route, navigation }) {
   };
 
   const handleSelectBus = (bus) => {
-    console.log('Bus object:', bus);
     navigation.navigate('BusSeatSelection', {
       busId: bus._id || bus.busId,
       routeNo: bus.routeNo,
       source,
       destination,
+      journeyDate,
+      busType: bus.busType,
+      operatorName: bus.operatorName,
       price: bus.price ?? 0,
       totalSeats: bus.totalSeats ?? bus.seatsAvailable ?? 40,
       departureTime: bus.departureTime,

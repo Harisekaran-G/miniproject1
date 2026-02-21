@@ -41,71 +41,60 @@ export default function PaymentScreen({ route, navigation }) {
       // 1. Generate Fake Transaction ID
       const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substring(7).toUpperCase()}`;
 
-      // 2. Prepare Booking Data
+      // 2. Generate Random Booking ID (BK2026XXXX)
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const bookingId = `BK2026${randomSuffix}`;
+
+      // 3. Prepare Booking Data
       // Extract details from route params
       const { pendingBookingDetails, pickupDetails, dropDetails } = route.params;
 
-      // Fallback if details missing (e.g. direct dev access)
-      const busDetails = pendingBookingDetails || {
-        busId: 'BUS-UNKNOWN',
-        seats: [],
-        routeNo: 'UNKNOWN',
-        source: 'Unknown',
-        destination: 'Unknown'
-      };
+      const busDetails = pendingBookingDetails || {};
 
       const bookingData = {
-        userEmail: 'auth_test_user@example.com', // In real app, get from Context/Auth
+        bookingId: bookingId,
+        userEmail: 'auth_test_user@example.com',
         passengerName: 'Demo User',
         passengerPhone: '9876543210',
         route: {
           from: busDetails.source,
           to: busDetails.destination
         },
-        busId: busDetails.routeNo, // Using routeNo as ID for simplicity
-        busName: busDetails.busName || `Route ${busDetails.routeNo}`,
+        date: busDetails.journeyDate || '21 Feb 2026',
+        busId: busDetails.routeNo,
+        busName: busDetails.operatorName || `Express ${busDetails.routeNo}`,
+        busType: busDetails.busType || 'AC Sleeper',
         seatNumbers: busDetails.seats,
         busFare: busFare || 0,
         taxiFare: taxiFare || 0,
         convenienceFee: convenienceFee || 0,
         totalFare: totalFare,
         taxiSelected: bookingType === 'hybrid',
-        // Detailed Taxi Info
-        taxiPickup: pickupDetails ? { ...pickupDetails, selected: true } : { selected: false },
-        taxiDrop: dropDetails ? { ...dropDetails, selected: true } : { selected: false },
-
-        // Payment Info
-        paymentStatus: 'paid',
+        boardingPoint: busDetails.boardingPoint,
+        droppingPoint: busDetails.droppingPoint,
+        taxiDetails: busDetails.taxiDetails,
+        paymentStatus: 'Paid',
         transactionId: transactionId,
-        status: 'confirmed'
+        status: 'Confirmed',
+        bookingTime: new Date().toLocaleString()
       };
 
       console.log('Creating Booking:', bookingData);
 
-      // 3. Call Backend API
+      // 4. Call Backend API
       const response = await bookingAPI.createBooking(bookingData);
 
       if (response.success) {
+        // SIMULATE SMS SENDING
         Alert.alert(
           'Payment Successful!',
-          `Transaction ID: ${transactionId}\n\nYour booking is confirmed!`,
+          `SMS confirmation sent to +919876543210\n\nBooking ID: ${bookingId}`,
           [
             {
-              text: 'View Booking',
+              text: 'View Trip Details',
               onPress: () => {
-                navigation.navigate('BookingConfirmation', {
-                  bookingData: { ...bookingData, bookingId: `BK_${Date.now()}` }
-                });
+                navigation.navigate('TripDetails', { bookingData });
               },
-            },
-            {
-              text: 'Home',
-              onPress: () => {
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'RouteInput' }],
-                });
-              }
             }
           ]
         );
@@ -151,31 +140,79 @@ export default function PaymentScreen({ route, navigation }) {
       </LinearGradient>
 
       <ScrollView style={styles.scrollContent}>
-        {/* Booking Summary */}
+        {/* Dual Booking Summary */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Booking Summary</Text>
 
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Base Fare:</Text>
-            <Text style={styles.summaryValue}>₹{busFare}</Text>
+          {/* Bus Section */}
+          <View style={styles.summarySection}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bus" size={18} color="#4A90E2" />
+              <Text style={styles.sectionHeaderText}>BUS SUMMARY</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Bus Name:</Text>
+              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.operatorName}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Seats:</Text>
+              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.seats?.join(', ')}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Boarding:</Text>
+              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.boardingPoint?.name}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Dropping:</Text>
+              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.droppingPoint?.name}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Bus Fare:</Text>
+              <Text style={styles.summaryValue}>₹{busFare}</Text>
+            </View>
           </View>
 
+          <View style={styles.summaryDivider} />
+
+          {/* Taxi Section */}
           {taxiFare > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Taxi Fare ({route.params.pendingBookingDetails?.taxiDetails?.name || 'Local'}):</Text>
-              <Text style={styles.summaryValue}>₹{taxiFare}</Text>
+            <View style={styles.summarySection}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="car" size={18} color="#27AE60" />
+                <Text style={styles.sectionHeaderText}>TAXI SUMMARY</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Taxi Type:</Text>
+                <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.taxiDetails?.type}</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Pickup:</Text>
+                <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.taxiDetails?.pickup}</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Drop:</Text>
+                <Text style={[styles.summaryValue, { maxWidth: '60%' }]} numberOfLines={1}>{route.params.pendingBookingDetails?.taxiDetails?.drop}</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Distance/Duration:</Text>
+                <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.taxiDetails?.distance} / {route.params.pendingBookingDetails?.taxiDetails?.duration}</Text>
+              </View>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Taxi Fare:</Text>
+                <Text style={styles.summaryValue}>₹{taxiFare}</Text>
+              </View>
             </View>
           )}
+
+          <View style={styles.summaryDivider} />
 
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Convenience Fee:</Text>
             <Text style={styles.summaryValue}>₹{convenienceFee || 20}</Text>
           </View>
 
-          <View style={styles.summaryDivider} />
-
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Total Amount:</Text>
+          <View style={[styles.summaryRow, { marginTop: 10 }]}>
+            <Text style={styles.summaryTotalLabel}>TOTAL AMOUNT:</Text>
             <Text style={styles.summaryTotal}>₹{totalFare}</Text>
           </View>
         </View>

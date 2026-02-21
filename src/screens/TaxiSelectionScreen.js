@@ -11,29 +11,29 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import TaxiMap from '../components/TaxiMap';
+import { taxiDropLocations } from '../data/taxiLocations';
 
 const { width } = Dimensions.get('window');
 
 export default function TaxiSelectionScreen({ route, navigation }) {
     const {
-        busId,
-        routeNo,
-        source,
-        destination,
-        departureTime,
-        arrivalTime,
-        price: busPrice,
-        selectedSeats,
-        totalBusFare,
-        boardingPoint,
-        droppingPoint,
+        busDropPoint,
+        busArrivalTime,
+        destinationCity,
+        busDetails
     } = route.params;
 
     const [selectedTaxi, setSelectedTaxi] = useState(null);
+    const [selectedDrop, setSelectedDrop] = useState(null);
     const [mapLoading, setMapLoading] = useState(true);
 
-    // Simulated Distance (8.5 km)
-    const distanceKm = 8.5;
+    // Get drop locations based on bus destination city
+    // Fallback to Chennai if city not found, or empty array
+    const dropOptions = taxiDropLocations[destinationCity] || taxiDropLocations['Chennai'] || [];
+
+    // Simulated stats based on selection
+    const distanceKm = selectedDrop ? 8.5 : 0;
+    const durationMins = selectedDrop ? 25 : 0;
 
     const taxiOptions = [
         {
@@ -43,7 +43,6 @@ export default function TaxiSelectionScreen({ route, navigation }) {
             baseRate: 20,
             icon: 'car',
             eta: '5 mins',
-            dropEta: '20 mins',
         },
         {
             id: 'sedan',
@@ -52,7 +51,6 @@ export default function TaxiSelectionScreen({ route, navigation }) {
             baseRate: 25,
             icon: 'car-sport',
             eta: '4 mins',
-            dropEta: '18 mins',
         },
         {
             id: 'suv',
@@ -61,7 +59,6 @@ export default function TaxiSelectionScreen({ route, navigation }) {
             baseRate: 35,
             icon: 'bus',
             eta: '8 mins',
-            dropEta: '25 mins',
         },
         {
             id: 'bike',
@@ -70,13 +67,12 @@ export default function TaxiSelectionScreen({ route, navigation }) {
             baseRate: 10,
             icon: 'bicycle',
             eta: '2 mins',
-            dropEta: '15 mins',
         },
     ];
 
     const calculatePrice = (baseRate) => {
+        if (!selectedDrop) return { min: 0, max: 0, display: 'Select Drop' };
         const price = Math.round(distanceKm * baseRate);
-        // Return a range string
         return {
             min: price,
             max: Math.round(price * 1.05),
@@ -85,28 +81,31 @@ export default function TaxiSelectionScreen({ route, navigation }) {
     };
 
     const handleConfirm = () => {
-        const taxiFare = selectedTaxi ? Math.round(distanceKm * selectedTaxi.baseRate) : 0;
-        const convenienceFee = 20;
-        const totalFare = totalBusFare + taxiFare + convenienceFee;
+        if (!selectedTaxi || !selectedDrop) {
+            alert('Please select both a taxi type and a drop location');
+            return;
+        }
+
+        const taxiFare = Math.round(distanceKm * selectedTaxi.baseRate);
+
+        const taxiData = {
+            type: selectedTaxi.name,
+            pickup: busDropPoint.name, // Automatically from bus drop point
+            drop: selectedDrop.name,
+            distance: `${distanceKm} km`,
+            duration: `${durationMins} mins`,
+            price: taxiFare
+        };
 
         navigation.navigate('Payment', {
-            totalFare,
-            bookingType: selectedTaxi ? 'hybrid' : 'bus',
-            busFare: totalBusFare,
+            totalFare: busDetails.totalBusFare + taxiFare,
+            bookingType: 'hybrid',
+            busFare: busDetails.totalBusFare,
             taxiFare,
-            convenienceFee,
+            taxiDetails: taxiData,
             pendingBookingDetails: {
-                busId,
-                routeNo,
-                source,
-                destination,
-                seats: selectedSeats,
-                departureTime,
-                arrivalTime,
-                price: busPrice,
-                boardingPoint,
-                droppingPoint,
-                taxiDetails: selectedTaxi ? { ...selectedTaxi, fare: taxiFare, distance: distanceKm } : null,
+                ...busDetails,
+                taxiDetails: taxiData
             }
         });
     };
@@ -119,17 +118,32 @@ export default function TaxiSelectionScreen({ route, navigation }) {
                 </TouchableOpacity>
                 <View>
                     <Text style={styles.headerTitle}>Select Your Ride</Text>
-                    <Text style={styles.headerSubtitle}>From: {droppingPoint?.name}</Text>
+                    <Text style={styles.headerSubtitle}>Pickup: {busDropPoint?.name} (Locked)</Text>
                 </View>
             </LinearGradient>
 
             <TaxiMap
-                dropPoint={[13.0827, 80.2707]}
-                finalDest={[12.9801, 80.2224]}
+                dropPoint={busDropPoint ? [13.0827, 80.2707] : [13.0827, 80.2707]} // Placeholder coordinates for busDropPoint marker
+                finalDest={selectedDrop ? [selectedDrop.lat, selectedDrop.lng] : (dropOptions[0] ? [dropOptions[0].lat, dropOptions[0].lng] : [13.0827, 80.2707])}
+                center={selectedDrop ? [selectedDrop.lat, selectedDrop.lng] : (dropOptions[0] ? [dropOptions[0].lat, dropOptions[0].lng] : [13.0827, 80.2707])}
             />
 
             <View style={styles.optionsContainer}>
-                <Text style={styles.sectionTitle}>Available Taxis</Text>
+                <Text style={styles.sectionTitle}>1. Select Drop Location ({destinationCity})</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 20 }}>
+                    {dropOptions.map((loc) => (
+                        <TouchableOpacity
+                            key={loc.id}
+                            style={[styles.dropCard, selectedDrop?.id === loc.id && styles.selectedDropCard]}
+                            onPress={() => setSelectedDrop(loc)}
+                        >
+                            <Ionicons name="location" size={20} color={selectedDrop?.id === loc.id ? '#FFF' : '#4A90E2'} />
+                            <Text style={[styles.dropText, selectedDrop?.id === loc.id && { color: '#FFF' }]}>{loc.name}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+
+                <Text style={styles.sectionTitle}>2. Select Taxi Type</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.optionsScroll}>
                     {taxiOptions.map((option) => {
                         const priceRange = calculatePrice(option.baseRate);
@@ -159,15 +173,12 @@ export default function TaxiSelectionScreen({ route, navigation }) {
 
             <View style={styles.footer}>
                 <TouchableOpacity style={styles.skipButton} onPress={() => navigation.navigate('Payment', {
-                    totalFare: totalBusFare + 20,
+                    totalFare: busDetails.totalBusFare + 20,
                     bookingType: 'bus',
-                    busFare: totalBusFare,
+                    busFare: busDetails.totalBusFare,
                     taxiFare: 0,
                     convenienceFee: 20,
-                    pendingBookingDetails: {
-                        busId, routeNo, source, destination, seats: selectedSeats,
-                        departureTime, arrivalTime, price: busPrice, boardingPoint, droppingPoint
-                    }
+                    pendingBookingDetails: busDetails
                 })}>
                     <Text style={styles.skipText}>Skip Taxi</Text>
                 </TouchableOpacity>
@@ -195,6 +206,43 @@ const styles = StyleSheet.create({
     map: { flex: 1 },
     loadingOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: '#F8F9FA', justifyContent: 'center', alignItems: 'center' },
     optionsContainer: { padding: 20, backgroundColor: '#FFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -30, elevation: 10 },
+    destinationBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F0F4F8',
+        padding: 12,
+        borderRadius: 12,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#D1D9E6'
+    },
+    dropCard: {
+        backgroundColor: '#FFF',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 10,
+        marginRight: 10,
+        borderWidth: 1,
+        borderColor: '#EEE',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    selectedDropCard: {
+        backgroundColor: '#4A90E2',
+        borderColor: '#4A90E2',
+    },
+    dropText: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '500'
+    },
+    destinationText: {
+        marginLeft: 10,
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#1E3A5F'
+    },
     sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 15 },
     optionsScroll: { flexDirection: 'row' },
     optionCard: {

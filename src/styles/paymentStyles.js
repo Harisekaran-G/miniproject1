@@ -57,10 +57,33 @@ export const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
+  summaryTotalLabel: {
+    fontSize: 18,
+    color: '#1E3A5F',
+    fontWeight: 'bold',
+  },
   summaryTotal: {
     fontSize: 24,
     color: '#4A90E2',
     fontWeight: 'bold',
+  },
+  summarySection: {
+    marginVertical: 5,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: '#E3F2FD',
+    padding: 6,
+    borderRadius: 6,
+  },
+  sectionHeaderText: {
+    marginLeft: 8,
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#1E3A5F',
+    letterSpacing: 1,
   },
   summaryDivider: {
     height: 1,
