@@ -64,7 +64,7 @@ export default function PaymentScreen({ route, navigation }) {
         busId: busDetails.routeNo,
         busName: busDetails.operatorName || `Express ${busDetails.routeNo}`,
         busType: busDetails.busType || 'AC Sleeper',
-        seatNumbers: busDetails.seats,
+        seatNumbers: busDetails.selectedSeats || [],
         busFare: busFare || 0,
         taxiFare: taxiFare || 0,
         convenienceFee: convenienceFee || 0,
@@ -156,7 +156,7 @@ export default function PaymentScreen({ route, navigation }) {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Seats:</Text>
-              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.seats?.join(', ')}</Text>
+              <Text style={styles.summaryValue}>{route.params.pendingBookingDetails?.selectedSeats?.join(', ')}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Boarding:</Text>
